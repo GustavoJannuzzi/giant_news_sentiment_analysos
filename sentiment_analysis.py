@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import plotly
 import plotly.express as px
-import json # for graph plotting in website
+import json 
 # NLTK VADER for sentiment analysis
 import nltk
 nltk.downloader.download('vader_lexicon')
@@ -13,7 +13,11 @@ import cufflinks as cf
 import yfinance as yf
 from datetime import datetime
 
-st.set_page_config(page_title = "Bohmian's Stock News Sentiment Analyzer", layout = "wide")
+st.header("Análise de sentimento - stock news")
+st.markdown('Carregando dados atualizados podemos monitorar o comportamento das ações listadas na bolsa americana.')
+st.markdown('NLTK é uma biblioteca de linguagem natural que permite fácil implementação e utilização.')
+st.markdown('Benjamin Graham, autor do Investidor Inteligente, introduz o "Sr. Mercado" como um persongem muito racional a longo prazo, porém no curto prazo ele tende a ser muito sensível e volátil com divulgação de notícias.')
+st.markdown('Com SentimentIntensityAnalyzer foi possível criar uma breve visualização dos sentimentos do "Sr. Mercado no momento.')
 
 
 def get_news(ticker):
@@ -90,7 +94,7 @@ def plot_hourly_sentiment(parsed_and_scored_news, ticker):
     mean_scores = parsed_and_scored_news.resample('H').mean()
 
     # Plot a bar chart with plotly
-    fig = px.bar(mean_scores, x=mean_scores.index, y='sentiment_score', title = ticker + ' Hourly Sentiment Scores')
+    fig = px.bar(mean_scores, x=mean_scores.index, y='sentiment_score', title = ticker + '- Score de sentiment analysis por hora')
     return fig # instead of using fig.show(), we return fig and turn it into a graphjson object for displaying in web page later
 
 def plot_daily_sentiment(parsed_and_scored_news, ticker):
@@ -99,70 +103,65 @@ def plot_daily_sentiment(parsed_and_scored_news, ticker):
     mean_scores = parsed_and_scored_news.resample('D').mean()
 
     # Plot a bar chart with plotly
-    fig = px.bar(mean_scores, x=mean_scores.index, y='sentiment_score', title = ticker + ' Daily Sentiment Scores')
+    fig = px.bar(mean_scores, x=mean_scores.index, y='sentiment_score', title = ticker + '- Score de sentiment analysis diário')
     return fig # instead of using fig.show(), we return fig and turn it into a graphjson object for displaying in web page later
 
 # for extracting data from finviz
 finviz_url = 'https://finviz.com/quote.ashx?t='
 
 
-st.header("Bohmian's Stock News Sentiment Analyzer")
-
-ticker = st.text_input('Enter Stock Ticker', '').upper()
+ticker = st.text_input('Escolha o código do ativo.', '').upper()
 
 df = pd.DataFrame({'datetime': datetime.now(), 'ticker': ticker}, index = [0])
 
 
 
 try:
-	st.subheader("Hourly and Daily Sentiment of {} Stock".format(ticker))
+	st.subheader("Sentimentos do ativo {} ".format(ticker))
 	
 except Exception as e:
 	print(str(e))
-	st.write("Enter a correct stock ticker, e.g. 'AAPL' above and hit Enter.")	
+	st.write("Insira um código válido, exemplo: 'AAPL' e pressione Enter.")	
 
 
-col1, col2 = st.columns(2)
-with col1:
-    try:
-        #Hourly chart
-        news_table = get_news(ticker)
-        parsed_news_df = parse_news(news_table)
-        print(parsed_news_df)
-        parsed_and_scored_news = score_news(parsed_news_df)
-        fig_hourly = plot_hourly_sentiment(parsed_and_scored_news, ticker)
-        fig_daily = plot_daily_sentiment(parsed_and_scored_news, ticker) 
+
+try:
+    #Gráfico horário
+    news_table = get_news(ticker)
+    parsed_news_df = parse_news(news_table)
+    print(parsed_news_df)
+    parsed_and_scored_news = score_news(parsed_news_df)
+    fig_hourly = plot_hourly_sentiment(parsed_and_scored_news, ticker)
+    fig_daily = plot_daily_sentiment(parsed_and_scored_news, ticker) 
+       
+    st.plotly_chart(fig_hourly)
+
         
-        st.plotly_chart(fig_hourly)
+except Exception as e:
+    print(str(e))
+    st.write("")	
 
-        
-    except Exception as e:
-        print(str(e))
-        st.write("Enter a correct stock ticker, e.g. 'AAPL' above and hit Enter.")	
 
-with col2:
-    try:
-        #Bollinger Bands
-        import datetime
-        start_date =  datetime.date(2022, 1, 1)
-        end_date = datetime.date(2022, 9, 24)
+try:
+    #Bollinger Bands
+    import datetime
+    start_date =  datetime.date(2022, 1, 1)
+    end_date = datetime.date(2022, 9, 24)
+    tickerSymbol =ticker
+    tickerData = yf.Ticker(tickerSymbol) # Get ticker data
+    tickerDf = tickerData.history(period='1d', start=start_date, end=end_date)
+    qf=cf.QuantFig(tickerDf,title='Bollinger Bands',legend='top',name='GS')
+    qf.add_bollinger_bands()
+    fig = qf.iplot(asFigure=True)
+    st.plotly_chart(fig)
 
-        tickerSymbol =ticker
-        tickerData = yf.Ticker(tickerSymbol) # Get ticker data
-        tickerDf = tickerData.history(period='1d', start=start_date, end=end_date)
-
-        qf=cf.QuantFig(tickerDf,title='First Quant Figure',legend='top',name='GS')
-        qf.add_bollinger_bands()
-        fig = qf.iplot(asFigure=True)
-        st.plotly_chart(fig)
-
-    except Exception as e:
-        print(str(e))
-        st.write(".")
+except Exception as e:
+    print(str(e))
+    st.write("YahooFinance pode estar com problemas")
 
 ### Table news, hourly chart, stock description
 try:
-	st.subheader("Hourly and Daily Sentiment of {} Stock".format(ticker))
+	st.subheader("")
 	news_table = get_news(ticker)
 	parsed_news_df = parse_news(news_table)
 	print(parsed_news_df)
@@ -173,10 +172,9 @@ try:
 	st.plotly_chart(fig_daily)
 
 	description = """
-		The above chart averages the sentiment scores of {} stock hourly and daily.
-		The table below gives each of the most recent headlines of the stock and the negative, neutral, positive and an aggregated sentiment score.
-		The news headlines are obtained from the FinViz website.
-		Sentiments are given by the nltk.sentiment.vader Python library.
+		A tabela abaixo trás cada tema mais recente sobre o ativo e um status negative, neutral, positive e trás um score "sentimental".
+		Os temas das notícias são do website FinViz.
+		Os sentimentos são avaliados pelo nltk.sentiment.vader, uma biblioteca Python.
 		""".format(ticker)
 		
 	st.write(description)	 
@@ -184,7 +182,7 @@ try:
 	
 except Exception as e:
 	print(str(e))
-	st.write("Enter a correct stock ticker, e.g. 'AAPL' above and hit Enter.")	
+	st.write("")	
 
 
 
