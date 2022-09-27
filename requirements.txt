@@ -29,4 +29,4 @@ streamlit-option-menu==0.3.2
 streamlit-aggrid==0.2.2.post4
 uvicorn==0.17.6
 yfinance==0.1.67
-bokeh==2.4.3
+cufflinks==0.17.3
