@@ -12,6 +12,7 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import cufflinks as cf
 import yfinance as yf
 from datetime import datetime
+import datetime
 
 st.header("Análise de sentimento - stock news")
 st.markdown('Carregando dados atualizados podemos monitorar o comportamento das ações listadas na bolsa americana.')
