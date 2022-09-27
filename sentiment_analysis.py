@@ -150,10 +150,11 @@ try:
     tickerSymbol =ticker
     tickerData = yf.Ticker(tickerSymbol) # Get ticker data
     tickerDf = tickerData.history(period='1d', start=start_date, end=end_date)
-    qf=cf.QuantFig(tickerDf,title='Bollinger Bands',legend='top',name='GS')
-    qf.add_bollinger_bands()
-    fig = qf.iplot(asFigure=True)
-    st.plotly_chart(fig)
+    st.write(tickerDf)
+    #qf=cf.QuantFig(tickerDf,title='Bollinger Bands',legend='top',name='GS')
+    #qf.add_bollinger_bands()
+    #fig = qf.iplot(asFigure=True)
+    #st.plotly_chart(fig)
 
 except Exception as e:
     print(str(e))
