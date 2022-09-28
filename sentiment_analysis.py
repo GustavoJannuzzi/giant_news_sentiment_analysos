@@ -157,7 +157,7 @@ try:
 
 except Exception as e:
     print(str(e))
-    st.write("YahooFinance pode estar com problemas")
+    st.error("YahooFinance pode estar com problemas", icon="🚨")
 
 ### Table news, hourly chart, stock description
 try:
