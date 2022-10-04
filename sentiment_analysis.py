@@ -110,7 +110,7 @@ def plot_daily_sentiment(parsed_and_scored_news, ticker):
 finviz_url = 'https://finviz.com/quote.ashx?t='
 
 
-ticker = st.text_input('Escolha o código do ativo.', '').upper()
+ticker = st.text_input('Escolha o código do ativo.', 'AAPL').upper()
 
 df = pd.DataFrame({'datetime': datetime.now(), 'ticker': ticker}, index = [0])
 
